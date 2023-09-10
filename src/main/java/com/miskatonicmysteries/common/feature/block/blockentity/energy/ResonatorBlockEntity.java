@@ -129,30 +129,33 @@ public class ResonatorBlockEntity extends BaseBlockEntity {
 		ResonatorSound.createSound(resonator.getPos());
 	}
 
-	private void spawnPhantasm() {
-		if (world instanceof ServerWorld) {
-			if (world.random.nextFloat() > intensity - 0.1F) {
-				return;
-			}
-			for (int i = 0; i < 8; i++) {
-				Vec3d pos = new Vec3d(getPos().getX() + world.random.nextGaussian() * (radius - 3),
-									  getPos().getY() + world.random.nextFloat() * radius - 7,
-									  getPos().getZ() + world.random.nextGaussian() * (radius - 3));
-				BlockPos blockPos = new BlockPos(pos);
-				if (!world.getBlockState(blockPos).isSolidBlock(world, blockPos) || world.random.nextFloat() < 0.25F) {
-					PhantasmaEntity phantasma = world.getRandom().nextBoolean() ? MMEntities.ABERRATION.create(world)
-																				: MMEntities.PHANTASMA.create(world);
-					phantasma.refreshPositionAndAngles(pos.getX(), pos.getY(), pos.getZ(), world.random.nextInt(360),
-													   0);
-					phantasma.initialize((ServerWorld) world, world.getLocalDifficulty(phantasma.getBlockPos()),
-										 SpawnReason.SPAWNER, null, null);
-					phantasma.setResonance(0.01F);
-					world.spawnEntity(phantasma);
-					return;
-				}
-			}
-		}
-	}
+private void spawnPhantasm() {
+    if (world instanceof ServerWorld) {
+        if (world.random.nextFloat() > intensity - 0.1F) {
+            return;
+        }
+        for (int i = 0; i < 8; i++) {
+            double xOffset = world.random.nextGaussian() * (radius - 3);
+            double yOffset = world.random.nextFloat() * radius - 7;
+            double zOffset = world.random.nextGaussian() * (radius - 3);
+
+            Vec3d pos = new Vec3d(getPos().getX() + xOffset,
+                                  getPos().getY() + yOffset,
+                                  getPos().getZ() + zOffset);
+
+            BlockPos blockPos = new BlockPos(pos);
+
+            if (!world.getBlockState(blockPos).isSolidBlock(world, blockPos) || world.random.nextFloat() < 0.25F) {
+                PhantasmaEntity phantasma = world.getRandom().nextBoolean() ? MMEntities.ABERRATION.create(world) : MMEntities.PHANTASMA.create(world);
+                phantasma.refreshPositionAndAngles(pos.x, pos.y, pos.z, world.random.nextInt(360), 0);
+                phantasma.initialize((ServerWorld) world, world.getLocalDifficulty(phantasma.getBlockPos()), SpawnReason.SPAWNER, null, null);
+                phantasma.setResonance(0.01F);
+                world.spawnEntity(phantasma);
+                return;
+            }
+        }
+    }
+}
 
 	private float getIntensityFromDistance(Entity affectedEntity) {
 		double distance = Math.sqrt(affectedEntity.squaredDistanceTo(pos.getX() + 0.5F, pos.getY() + 0.75F,
